@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>Flipbook</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preload" as="image" href="binder.png" fetchpriority="high" />
+  <link rel="preload" as="image" href="rings-overlay.png" fetchpriority="high" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: oklch(0.965 0.005 80);
+      --bg-2: oklch(0.94 0.008 80);
+      --ink: oklch(0.18 0.01 240);
+      --ink-soft: oklch(0.4 0.01 240);
+      --chrome: oklch(0.22 0.02 230);
+      --chrome-fg: oklch(0.96 0.005 80);
+      --binder-aspect: calc(3092 / 2160);
+
+      /* Page area aspect ratio (computed from page-area % above):
+         width: 90.93% of binder width = .9093 * 3092 = 2811
+         height: 73.61% of binder height = .7361 * 2160 = 1590
+         ratio: 2811 / 1590 = 1.768 — pages are 16:9 ≈ 1.778, so very close. */
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; height: 100%; }
+    body {
+      background:
+        radial-gradient(ellipse at 50% 30%, var(--bg) 0%, var(--bg-2) 100%);
+      color: var(--ink);
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      overflow: hidden;
+      overscroll-behavior: none;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      touch-action: pan-y;
+    }
+    #root { width: 100%; height: 100%; }
+
+    /* ───────────────── Closed cover (landing) ─────────────────
+       Sits INSIDE .binder-wrap at inset:0 so it occupies the same rect as
+       the open binder (with the same surrounding margins). */
+    .closed-cover {
+      position: absolute;
+      inset: 0;
+      z-index: 1000;
+      background: #2f5b6b; /* matches the suede tone so any sub-pixel gap blends */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      animation: coverFadeIn 0.4s ease both;
+    }
+    .closed-cover.dismissing {
+      animation: coverFadeOut 0.35s ease both;
+      pointer-events: none;
+    }
+    .closed-cover .cover-img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+    .closed-cover .cta-button {
+      position: absolute;
+      bottom: clamp(28px, 6vh, 80px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      color: oklch(0.95 0.005 80);
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      font-size: clamp(11px, 1.1vw, 14px);
+      letter-spacing: 0.32em;
+      text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 4px;
+      transition: opacity 0.2s ease, gap 0.25s ease;
+      /* The artwork already includes a styled "EXCLUSIVE FIRST LOOK ›" at
+         the bottom — this button sits on top of it as an invisible click
+         target, sized to roughly match the artwork's CTA region. The text
+         + arrow below are kept for accessibility / screen readers. */
+      min-width: 240px;
+      min-height: 44px;
+      color: transparent; /* hide our text — the artwork has its own */
+    }
+    .closed-cover .cta-button:hover { gap: 18px; }
+    .closed-cover .cta-button:focus-visible {
+      outline: 2px solid oklch(0.95 0.005 80 / 0.6);
+      outline-offset: 6px;
+      color: oklch(0.95 0.005 80); /* show text on keyboard focus */
+    }
+    @keyframes coverFadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    @keyframes coverFadeOut {
+      from { opacity: 1; }
+      to   { opacity: 0; }
+    }
+
+    /* ───────────────── Phase B: cover-flip stage ─────────────────
+       Sits INSIDE .binder-wrap so the cover-flip hinges at the binder's
+       left edge — as the cover swings open the rings emerge from under it. */
+    .cover-stage {
+      position: absolute;
+      inset: 0;
+      z-index: 999;
+      transform-style: preserve-3d;
+      pointer-events: none;
+    }
+    .cover-page-area {
+      position: absolute;
+      inset: 0;
+      transform-style: preserve-3d;
+      overflow: visible;
+    }
+
+    /* ───────────────── Phase C: zoom to fit ─────────────────
+       After the cover-flip lands, the binder scales + translates so the
+       page-area exactly fills the viewport. The transform itself is set
+       inline from JS (computed from getBoundingClientRect); this class
+       just controls the transition + binder-chrome fade-out. */
+    .binder-wrap.zooming,
+    .binder-wrap.fullscreen {
+      transition:
+        transform 700ms cubic-bezier(0.5, 0, 0.2, 1),
+        filter 700ms ease;
+      filter: drop-shadow(0 0 0 transparent);
+    }
+    .binder-wrap.zooming .binder-img,
+    .binder-wrap.fullscreen .binder-img,
+    .binder-wrap.zooming .rings-img,
+    .binder-wrap.fullscreen .rings-img {
+      transition: opacity 600ms ease 80ms;
+      opacity: 0;
+    }
+    /* Phase D: stable full-screen state. Binder chrome is gone; the inner
+       page-frame shadow is dropped so the slide reads as a clean canvas. */
+    .binder-wrap.fullscreen .binder-img,
+    .binder-wrap.fullscreen .rings-img {
+      display: none;
+    }
+    .binder-wrap.fullscreen .page-area {
+      box-shadow: none !important;
+    }
+
+    /* ───────────────── App layout ───────────────── */
+    .app {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: clamp(8px, 1.5vw, 24px);
+      padding: clamp(12px, 2vw, 32px) clamp(8px, 1.5vw, 24px);
+    }
+
+    /* ───────────────── Stage + binder ───────────────── */
+    .stage {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      perspective: 2400px;
+      perspective-origin: 50% 50%;
+    }
+    .binder-wrap {
+      position: relative;
+      /* Fit binder into viewport while preserving aspect ratio */
+      width: min(96%, calc((100vh - 96px) * var(--binder-aspect)));
+      aspect-ratio: var(--binder-aspect);
+      max-height: calc(100vh - 96px);
+      filter:
+        drop-shadow(0 30px 50px oklch(0.2 0.02 230 / 0.28))
+        drop-shadow(0 10px 20px oklch(0.2 0.02 230 / 0.18));
+      transform-style: preserve-3d;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .binder-img, .rings-img {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+    .binder-img { z-index: 1; }
+    .rings-img {
+      width: auto;
+      height: 100%;
+      /* rings-overlay.png is 200/3092 = 6.47% of binder width */
+      z-index: 600; /* above pages */
+      filter: drop-shadow(2px 0 4px oklch(0.2 0 0 / 0.25));
+    }
+
+    /* ───────────────── Page area (inner blue rectangle) ───────────────── */
+    .page-area {
+      position: absolute;
+      z-index: 5;
+      transform-style: preserve-3d;
+      /* subtle inner shadow on the blue page well */
+      box-shadow:
+        inset 0 0 0 1px oklch(0.4 0.04 230 / 0.15),
+        inset 6px 12px 24px oklch(0.2 0.04 230 / 0.25),
+        inset -4px -8px 18px oklch(0.2 0.04 230 / 0.18);
+      border-radius: 2px;
+    }
+
+    /* ───────────────── Page (stack) ───────────────── */
+    .page {
+      position: absolute;
+      inset: 0;
+      transform-origin: left center;
+      transform-style: preserve-3d;
+      will-change: transform;
+    }
+    .page.static {
+      transform: translateZ(0);
+      box-shadow:
+        0 1px 2px oklch(0.1 0 0 / 0.4),
+        0 4px 8px oklch(0.1 0 0 / 0.25);
+    }
+    /* Subtle page thickness on right side for the top static page */
+    .page.static::after {
+      content: '';
+      position: absolute;
+      top: 0; bottom: 0;
+      right: -3px;
+      width: 3px;
+      background: linear-gradient(to right,
+        oklch(0.25 0.01 240) 0%,
+        oklch(0.1 0 0) 50%,
+        oklch(0.18 0.01 240) 100%);
+      border-radius: 0 1px 1px 0;
+      box-shadow: 1px 0 3px oklch(0 0 0 / 0.35);
+    }
+
+    /* ───────────── Strip-based flipping page (the realistic bend) ───────────── */
+    .flipping-outer {
+      position: absolute;
+      inset: 0;
+      transform-origin: left center;
+      transform-style: preserve-3d;
+      will-change: transform;
+      z-index: 500;
+      /* Drop shadow follows the page during flip */
+      filter:
+        drop-shadow(0 16px 26px oklch(0 0 0 / 0.45))
+        drop-shadow(0 6px 12px oklch(0 0 0 / 0.3));
+    }
+    .strip {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      transform-origin: 0% 50%;
+      transform-style: preserve-3d;
+      will-change: transform;
+      backface-visibility: visible;
+    }
+    .strip-face {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      backface-visibility: hidden;
+      background: #050505;
+    }
+    .strip-front {
+      /* default */
+    }
+    .strip-back {
+      transform: rotateY(180deg);
+      background: #080808;
+    }
+    .strip-back-tex {
+      position: absolute;
+      inset: 0;
+      opacity: 0.08;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.55 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+      pointer-events: none;
+    }
+    .strip-content {
+      position: absolute;
+      top: 0;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      /* width and left set inline based on strip index */
+    }
+    /* Per-strip shading (darker as strip tilts away from viewer) */
+    .strip-shade {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: oklch(0 0 0 / var(--strip-shade, 0));
+      transition: none;
+    }
+    /* Per-strip sheen highlight (paper catches light at the curve apex) */
+    .strip-sheen {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      mix-blend-mode: screen;
+      background: linear-gradient(to right,
+        oklch(1 0 0 / 0) 0%,
+        oklch(1 0 0 / 1) 50%,
+        oklch(1 0 0 / 0) 100%);
+      opacity: var(--strip-sheen, 0);
+    }
+    /* Subtle dark line at the right edge of each strip — gives paper "creasing" between segments */
+    .strip-crease {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 1px;
+      height: 100%;
+      pointer-events: none;
+      background: linear-gradient(to bottom,
+        oklch(0 0 0 / 0) 0%,
+        oklch(0 0 0 / 0.4) 40%,
+        oklch(0 0 0 / 0.4) 60%,
+        oklch(0 0 0 / 0) 100%);
+      opacity: calc(var(--strip-shade, 0) * 1.4);
+    }
+
+    /* Cast shadow that drifts across the page beneath the flipping one */
+    .flip-cast-shadow {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 200;
+      opacity: 0;
+      background: radial-gradient(
+        ellipse 60% 80% at var(--shadow-x, 50%) 50%,
+        oklch(0 0 0 / 0.55) 0%,
+        oklch(0 0 0 / 0.2) 35%,
+        oklch(0 0 0 / 0) 70%
+      );
+      mix-blend-mode: multiply;
+    }
+
+    /* ───────────────── Page face content ───────────────── */
+    .page-face {
+      position: absolute;
+      inset: 0;
+      background: #050505;
+      color: oklch(0.96 0.003 80);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      backface-visibility: hidden;
+    }
+    .page-face.is-back {
+      transform: rotateY(180deg);
+      background: #0a0a0a;
+    }
+
+    /* Full-page CDN image content — rendered as a div with background-image
+       so the bitmap is decoded once per slide URL and reused across every
+       strip cell on every face (84 cells per flipping page would otherwise
+       require 84 independent <img> paint targets, the cause of mid-flip
+       gray-bar artifacts). */
+    .page-image {
+      position: absolute;
+      inset: 0;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: cover;
+      user-select: none;
+    }
+
+    /* Subtle paper texture (procedural noise via SVG filter) */
+    .paper-tex {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.06;
+      mix-blend-mode: screen;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.6 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    }
+
+    /* Soft inner shadow at page edges */
+    .page-inner-shadow {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      box-shadow:
+        inset 0 0 28px oklch(0 0 0 / 0.55),
+        inset 0 0 90px oklch(0 0 0 / 0.35);
+    }
+    /* Stronger gutter shadow on the binding (left) edge */
+    .page-gutter-shadow {
+      position: absolute;
+      top: 0; bottom: 0; left: 0;
+      width: 14%;
+      pointer-events: none;
+      background: linear-gradient(to right,
+        oklch(0 0 0 / 0.55) 0%,
+        oklch(0 0 0 / 0.25) 35%,
+        oklch(0 0 0 / 0) 100%);
+    }
+
+    /* Page number typography */
+    .page-num-wrap {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: clamp(8px, 1.6vw, 22px);
+      transform: translateX(3%); /* nudge right of the gutter shadow */
+    }
+    .page-num {
+      font-family: 'Cormorant Garamond', 'Times New Roman', serif;
+      font-weight: 300;
+      font-size: clamp(80px, 18vw, 280px);
+      line-height: 0.9;
+      letter-spacing: -0.02em;
+      color: oklch(0.97 0.003 80);
+      text-shadow: 0 2px 14px oklch(0 0 0 / 0.4);
+    }
+    .page-num-sub {
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      font-size: clamp(9px, 1vw, 14px);
+      letter-spacing: 0.32em;
+      text-transform: uppercase;
+      color: oklch(0.6 0.003 80);
+    }
+
+    /* Cover styling */
+    .cover-content {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: clamp(14px, 2vw, 30px);
+      transform: translateX(3%);
+    }
+    .cover-mark {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(28px, 4vw, 60px);
+      color: oklch(0.78 0.06 80);
+      transform: rotate(45deg);
+      letter-spacing: 0;
+    }
+    .cover-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-style: italic;
+      font-size: clamp(70px, 13vw, 220px);
+      letter-spacing: 0.04em;
+      line-height: 1;
+      color: oklch(0.95 0.005 80);
+      text-shadow: 0 2px 14px oklch(0 0 0 / 0.4);
+    }
+    .cover-sub {
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      font-size: clamp(10px, 1.1vw, 15px);
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: oklch(0.62 0.02 80);
+      padding-top: clamp(4px, 0.6vw, 10px);
+      border-top: 1px solid oklch(0.4 0 0 / 0.6);
+    }
+
+    /* Sheen overlay during flip — simulates page curl/highlight */
+    .page-sheen, .page-back-sheen {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      backface-visibility: hidden;
+      mix-blend-mode: screen;
+      background: linear-gradient(95deg,
+        oklch(1 0 0 / 0) 30%,
+        oklch(1 0 0 / 0.06) 50%,
+        oklch(1 0 0 / 0) 70%);
+      opacity: 0.7;
+    }
+    .page-back-sheen {
+      transform: rotateY(180deg);
+      background: linear-gradient(265deg,
+        oklch(1 0 0 / 0) 30%,
+        oklch(1 0 0 / 0.04) 50%,
+        oklch(1 0 0 / 0) 70%);
+    }
+
+    /* ───────────────── Left-stack: persistent flipped pages ─────────────────
+       Pages that have been flipped sit rotated -180° around the hinge, fanned
+       slightly out from the binder spine. They show the BACK of the paper. */
+    .page.left-stack {
+      background: #0a0a0a;
+      box-shadow:
+        0 2px 6px oklch(0 0 0 / 0.5),
+        0 8px 18px oklch(0 0 0 / 0.35);
+      backface-visibility: visible;
+      overflow: hidden;
+      border-radius: 1px;
+    }
+    /* Counter-rotates the parent's rotateY(-180°) so a slide rendered inside
+       reads upright. Used for the depth-0 (most-recently-flipped) left-stack
+       page so the user keeps seeing the slide they just turned. */
+    .page.left-stack .left-stack-content {
+      position: absolute;
+      inset: 0;
+      transform: rotateY(180deg);
+      backface-visibility: visible;
+      background: #050505;
+      overflow: hidden;
+    }
+    .page.left-stack .left-stack-face {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 30% 50%, oklch(0.16 0.005 240) 0%, oklch(0.08 0 0) 70%);
+      /* Subtle inner shadow to look like a thick page */
+      box-shadow:
+        inset 0 0 24px oklch(0 0 0 / 0.55),
+        inset 0 0 70px oklch(0 0 0 / 0.4),
+        inset -2px 0 6px oklch(0 0 0 / 0.5);
+    }
+    .page.left-stack .left-stack-tex {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.10;
+      mix-blend-mode: screen;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.6 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    }
+    /* Thin highlight on the spine-side edge (visually the right edge once
+       rotated) — gives the stacked pages an obvious thickness. */
+    .page.left-stack .left-stack-edge-shadow {
+      position: absolute;
+      top: 0; bottom: 0; right: 0;
+      width: 6px;
+      pointer-events: none;
+      background: linear-gradient(to left,
+        oklch(0 0 0 / 0.55) 0%,
+        oklch(0 0 0 / 0.15) 60%,
+        oklch(0 0 0 / 0) 100%);
+    }
+
+    /* ───────────────── Drag zones — corner pull-to-flip ─────────────────
+       Wide invisible strips along the right and left page edges. Big enough
+       to grab on touch; live BELOW the corner-target buttons so a quick tap
+       still fires those, but ABOVE the static pages so pointer events route
+       to the drag handler. */
+    .drag-zone {
+      position: absolute;
+      top: 0; bottom: 0;
+      width: 22%;
+      z-index: 650;
+      touch-action: none;
+      cursor: grab;
+    }
+    .drag-zone:active { cursor: grabbing; }
+    .drag-fwd { right: 0; }
+    .drag-bwd { left: 0; width: 14%; }
+
+    /* Corner click targets — invisible affordances at right corners (forward) and left (backward).
+       Left corners are pretty narrow since the rings sit there. */
+    .corner-target {
+      position: absolute;
+      width: 16%;
+      height: 28%;
+      cursor: pointer;
+      z-index: 700;
+    }
+    .corner-target.tr { top: 0; right: 0; border-radius: 0 0 0 40%; }
+    .corner-target.br { bottom: 0; right: 0; border-radius: 40% 0 0 0; }
+    .corner-target.tl { top: 0; left: 0; width: 12%; border-radius: 0 0 40% 0; }
+    .corner-target.bl { bottom: 0; left: 0; width: 12%; border-radius: 0 40% 0 0; }
+    .corner-target:hover {
+      background: radial-gradient(ellipse at var(--hx, 90%) var(--hy, 90%),
+        oklch(1 0 0 / 0.08) 0%,
+        oklch(1 0 0 / 0) 70%);
+    }
+    .corner-target.tr:hover { --hx: 90%; --hy: 10%; }
+    .corner-target.br:hover { --hx: 90%; --hy: 90%; }
+    .corner-target.tl:hover { --hx: 10%; --hy: 10%; }
+    .corner-target.bl:hover { --hx: 10%; --hy: 90%; }
+
+    /* ───────────────── Nav buttons ───────────────── */
+    .nav-btn {
+      width: clamp(40px, 5vw, 58px);
+      height: clamp(40px, 5vw, 58px);
+      border-radius: 50%;
+      border: 1px solid oklch(0.25 0.01 230 / 0.15);
+      background: oklch(0.99 0.003 80);
+      color: var(--chrome);
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease;
+      box-shadow:
+        0 1px 2px oklch(0.2 0 0 / 0.08),
+        0 8px 24px oklch(0.2 0 0 / 0.1);
+      z-index: 50;
+    }
+    .nav-btn:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow:
+        0 2px 4px oklch(0.2 0 0 / 0.12),
+        0 14px 32px oklch(0.2 0 0 / 0.14);
+    }
+    .nav-btn:active:not(:disabled) {
+      transform: translateY(0);
+      background: oklch(0.95 0.005 80);
+    }
+    .nav-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+    /* Hidden state — kept in the DOM so the grid columns don't collapse,
+       but fully invisible and non-interactive (used during the closed-cover
+       and cover-flip / zoom phases). */
+    .nav-btn.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 200ms ease;
+    }
+
+    /* ───────────────── Chrome (counter) ───────────────── */
+    .chrome {
+      position: fixed;
+      bottom: clamp(14px, 2.2vw, 28px);
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      padding: 8px 18px;
+      background: oklch(0.99 0.003 80 / 0.85);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-radius: 999px;
+      box-shadow:
+        0 1px 2px oklch(0 0 0 / 0.06),
+        0 10px 30px oklch(0 0 0 / 0.1);
+      z-index: 30;
+    }
+    .counter {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 400;
+      font-size: 18px;
+      letter-spacing: 0.05em;
+      color: var(--chrome);
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+      min-width: 60px;
+      justify-content: center;
+    }
+    .counter-num { font-size: 22px; }
+    .counter-sep { color: oklch(0.6 0 0); }
+    .counter-total { color: oklch(0.5 0 0); }
+
+    /* ───────────────── Keyboard hint ───────────────── */
+    .hint {
+      position: fixed;
+      top: clamp(14px, 2.4vw, 28px);
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 8px 18px;
+      background: oklch(0.18 0.02 230 / 0.85);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      color: oklch(0.96 0.005 80);
+      font-size: 13px;
+      letter-spacing: 0.04em;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 8px 24px oklch(0 0 0 / 0.2);
+      cursor: pointer;
+      animation: hintFadeIn 0.4s ease both, hintPulse 2.5s ease-in-out 0.8s infinite;
+      z-index: 40;
+    }
+    .hint kbd {
+      display: inline-grid;
+      place-items: center;
+      min-width: 22px;
+      height: 22px;
+      padding: 0 6px;
+      background: oklch(0.96 0.005 80);
+      color: oklch(0.18 0.02 230);
+      border-radius: 6px;
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      box-shadow: 0 1px 0 oklch(0 0 0 / 0.3);
+    }
+    @keyframes hintFadeIn {
+      from { opacity: 0; transform: translate(-50%, -8px); }
+      to   { opacity: 1; transform: translate(-50%, 0); }
+    }
+    @keyframes hintPulse {
+      0%, 100% { opacity: 0.95; }
+      50%      { opacity: 0.7; }
+    }
+
+    /* ───────────────── Responsive ───────────────── */
+    @media (max-width: 720px) {
+      .app {
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr;
+        padding: 12px;
+      }
+      .stage { grid-row: 1; }
+      .nav-btn {
+        position: fixed;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 40;
+      }
+      .nav-prev { left: 8px; }
+      .nav-next { right: 8px; }
+      .nav-btn:hover:not(:disabled) { transform: translateY(-50%); }
+      .binder-wrap {
+        width: 100%;
+        max-height: calc(100vh - 120px);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script crossorigin src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+  <script src="pages.js?v=3"></script>
+  <script src="flipbook.js?v=7"></script>
+</body>
+</html>

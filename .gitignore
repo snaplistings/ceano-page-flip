@@ -1,0 +1,19 @@
+# macOS
+.DS_Store
+
+# Tooling / planning artifacts (not part of the deployed app)
+.agents/
+.claude/
+skills-lock.json
+
+# Design source materials (kept locally for reference, not shipped)
+flipbook-handoff/
+flipbook-handoff.zip
+codepen-example/
+slides png/
+"slides png"/
+
+# Editor + OS
+*.log
+*.swp
+Thumbs.db
