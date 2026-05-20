@@ -17,12 +17,14 @@
       --ink-soft: oklch(0.4 0.01 240);
       --chrome: oklch(0.22 0.02 230);
       --chrome-fg: oklch(0.96 0.005 80);
-      --binder-aspect: calc(3092 / 2160);
+      /* Binder is cropped to 16:9 (3092 × 1739) so the entire canvas — binder
+         frame, cover, slides — shares a single 1920×1080 aspect ratio. */
+      --binder-aspect: calc(1920 / 1080);
 
-      /* Page area aspect ratio (computed from page-area % above):
-         width: 90.93% of binder width = .9093 * 3092 = 2811
-         height: 73.61% of binder height = .7361 * 2160 = 1590
-         ratio: 2811 / 1590 = 1.768 — pages are 16:9 ≈ 1.778, so very close. */
+      /* Page area inside the cropped binder:
+         width: 90.88% × 3092 = 2810 px
+         height: 91.43% × 1739 = 1590 px
+         aspect: 2810 / 1590 = 1.767 ≈ 16:9 */
     }
 
     * { box-sizing: border-box; }
@@ -112,13 +114,16 @@
 
     /* ───────────────── Phase B: cover-flip stage ─────────────────
        Sits INSIDE .binder-wrap so the cover-flip hinges at the binder's
-       left edge — as the cover swings open the rings emerge from under it. */
+       left edge — as the cover swings open the rings emerge from under it.
+       `overflow: hidden` clips the rotating strips to the binder rect so
+       the mid-flip cover never paints outside the binder's frame. */
     .cover-stage {
       position: absolute;
       inset: 0;
       z-index: 999;
       transform-style: preserve-3d;
       pointer-events: none;
+      overflow: hidden;
     }
     .cover-page-area {
       position: absolute;
@@ -735,8 +740,10 @@
       .nav-next { right: 8px; }
       .nav-btn:hover:not(:disabled) { transform: translateY(-50%); }
       .binder-wrap {
-        width: 100%;
-        max-height: calc(100vh - 120px);
+        /* Maintain 16:9 aspect on mobile too — letterbox top/bottom rather
+           than stretch to full width and break the ratio. */
+        width: min(96%, calc((100vh - 80px) * var(--binder-aspect)));
+        max-height: calc(100vh - 80px);
       }
     }
   </style>
@@ -747,6 +754,6 @@
   <script crossorigin src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
   <script src="pages.js?v=3"></script>
-  <script src="flipbook.js?v=7"></script>
+  <script src="flipbook.js?v=8"></script>
 </body>
 </html>

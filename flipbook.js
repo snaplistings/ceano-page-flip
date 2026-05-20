@@ -30,11 +30,14 @@
   const AUTO_FLIP_MAX_MS = 1080;
 
   // Inner blue page area within the binder image (as % of binder dimensions).
+  // binder.png is cropped to 16:9 (3092 × 1739) — top trimmed by 211 px,
+  // bottom by 210 px. Page-area pixel rect (left 170, right 2980, top 69,
+  // bottom 1659) re-mapped to the cropped frame; left/right unchanged.
   const PAGE_AREA = {
     left:   170 / 3092 * 100,
-    top:    280 / 2160 * 100,
+    top:    69 / 1739 * 100,
     right:  2980 / 3092 * 100,
-    bottom: 1870 / 2160 * 100,
+    bottom: 1659 / 1739 * 100,
   };
   const PAGE_AREA_STYLE = {
     left: PAGE_AREA.left + '%',
