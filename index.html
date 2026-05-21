@@ -6,8 +6,8 @@
   <title>Ceano · Lookbook</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="preload" as="image" href="binder.png" fetchpriority="high" />
-  <link rel="preload" as="image" href="rings-overlay.png" fetchpriority="high" />
+  <link rel="preload" as="image" href="binder_1x.webp" fetchpriority="high" />
+  <link rel="preload" as="image" href="https://d1j3fd6wolejlf.cloudfront.net/ceano-book-cover-(1).png" fetchpriority="high" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <style>
     :root {
@@ -81,23 +81,14 @@
         filter 700ms ease;
     }
 
-    /* ───────────────── Binder artwork ───────────────── */
-    .binder-img,
-    .rings-img {
+    /* ───────────────── Binder artwork (hingeless tray) ───────────────── */
+    .binder-img {
       position: absolute;
       top: 0; left: 0;
       width: 100%;
       height: 100%;
       pointer-events: none;
-    }
-    .binder-img { z-index: 1; }
-    .rings-img {
-      width: auto;
-      height: 100%;
-      /* Rings PNG is ~6.47% of binder width; render above the page-area
-         so it sits visually over the slide's hinge edge. */
-      z-index: 600;
-      filter: drop-shadow(2px 0 4px oklch(0.2 0 0 / 0.25));
+      z-index: 1;
     }
 
     /* ───────────────── Page area (inner blue page well) ───────────────── */
@@ -111,6 +102,23 @@
         inset 6px 12px 24px oklch(0.2 0.04 230 / 0.25),
         inset -4px -8px 18px oklch(0.2 0.04 230 / 0.18);
       border-radius: 2px;
+      /* Inline geometry (left/top/width/height) animates as the slide
+         expands from the inset binder rect to full-screen. */
+      transition:
+        top 700ms cubic-bezier(0.5, 0, 0.2, 1),
+        left 700ms cubic-bezier(0.5, 0, 0.2, 1),
+        width 700ms cubic-bezier(0.5, 0, 0.2, 1),
+        height 700ms cubic-bezier(0.5, 0, 0.2, 1),
+        box-shadow 700ms ease,
+        border-radius 700ms ease;
+    }
+    /* At full-screen the slide covers the binder tray, and the page-well
+       depth + rounded corners drop for clean full-bleed edges. */
+    .binder-wrap.zooming .page-area,
+    .binder-wrap.open .page-area {
+      box-shadow: none;
+      border-radius: 0;
+      z-index: 700;
     }
 
     /* ───────────────── Static slide (background of the page-area) ───────────────── */
@@ -121,6 +129,43 @@
       background-position: center;
       background-repeat: no-repeat;
       z-index: 1;
+    }
+
+    /* Video slides fill the page well like the still slides (cover + crop). */
+    video.static-slide,
+    video.flip-face {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* Inner fill inside an overlay flip-face wrapper — works for video or still. */
+    .slide-fill {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      display: block;
+    }
+
+    /* Centered emblem composited on top of a slide (e.g. the Thank-You end card).
+       pointer-events:none so the prev/next click halves underneath stay active. */
+    .slide-overlay {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      height: 55%;
+      width: auto;
+      max-width: 80%;
+      pointer-events: none;
+      z-index: 3;
+      filter: drop-shadow(0 6px 24px oklch(0 0 0 / 0.35));
     }
 
     /* ───────────────── Simple flipping page ─────────────────
@@ -215,6 +260,29 @@
     }
     .click-half-prev { left: 0; }
     .click-half-next { right: 0; }
+
+    /* Invisible click target over the printed "DOWNLOAD FLOOR PLAN" CTA in the
+       top-right of slides 22–27. Layered above the next-half so the corner
+       downloads the slide instead of paging forward. */
+    .download-hotspot {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 22%;
+      height: 10%;
+      z-index: 800;
+      background: transparent;
+      border: none;
+      padding: 0;
+      margin: 0;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .download-hotspot:focus-visible {
+      outline: 2px solid oklch(0.95 0.005 80 / 0.7);
+      outline-offset: -6px;
+      border-radius: 8px;
+    }
 
     /* ───────────────── Nav buttons ───────────────── */
     .nav-btn {
@@ -315,7 +383,7 @@
 
   <script crossorigin src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
-  <script src="pages.js?v=3"></script>
-  <script src="flipbook.js?v=10"></script>
+  <script src="pages.js?v=9"></script>
+  <script src="flipbook.js?v=19"></script>
 </body>
 </html>
