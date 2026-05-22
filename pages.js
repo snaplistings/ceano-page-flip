@@ -39,7 +39,7 @@
     /* 18 */ img('ceano_digital_preview_17.png', 'Ceano slide 18'),
     /* 19 */ img('ceano_digital_preview_18.png', 'Ceano slide 19'),
     /* 20 */ img('ceano_digital_preview_21.png', 'Ceano slide 20'),
-    /* 21 */ img('ceano_digital_preview_23.png', 'Ceano slide 21'),
+    /* 21 */ img('ceano_24_residences.png', 'Ceano slide 21'),
     // Slides 22–27 are residence floor plans with a printed "DOWNLOAD FLOOR PLAN"
     // CTA in the top-right corner. `download: true` activates an invisible hotspot
     // over it; `downloadUrl` is the residence PDF that the hotspot opens in a new
