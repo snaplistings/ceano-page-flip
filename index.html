@@ -377,6 +377,28 @@
         width: min(96%, calc((100vh - 80px) * var(--binder-aspect)));
         max-height: calc(100vh - 80px);
       }
+
+      /* Floor-plan slides (22–27) are unreadable in the small 16:9 portrait band,
+         so on phones the whole slide becomes a tap target that opens the residence
+         PDF (zoomable in the native viewer). Swipe + the nav arrows still page. */
+      .download-hotspot { width: 100%; height: 100%; }
+      .download-hotspot::after {
+        content: "Tap to view floor plan";
+        position: absolute;
+        left: 50%;
+        bottom: 12%;
+        transform: translateX(-50%);
+        white-space: nowrap;
+        padding: 8px 16px;
+        border-radius: 999px;
+        background: oklch(0.22 0.02 230 / 0.78);
+        color: oklch(0.97 0.005 80);
+        font: 500 12px/1 'Inter', sans-serif;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        box-shadow: 0 4px 14px oklch(0 0 0 / 0.25);
+        pointer-events: none;
+      }
     }
   </style>
 </head>
