@@ -72,6 +72,16 @@
     if (page) openExternal(page.downloadUrl || page.image);
   }
 
+  // On phones (<=720px) a slide may define a `mobileImage`; swap it in for the
+  // desktop `image` so StaticSlide/FlipFace render the mobile still with no change
+  // to those components (also covers the flip faces).
+  function resolvePage(page, isMobile) {
+    if (isMobile && page && page.mobileImage) {
+      return Object.assign({}, page, { image: page.mobileImage });
+    }
+    return page;
+  }
+
   // ─────────────────────────── Slide video ───────────────────────────
   // Muted, inline. By default plays through once (no `controls`) and holds on its
   // final frame; pass `loop` to loop continuously instead (used for the Waves
@@ -243,8 +253,26 @@
     // flip: null | { dir: 'forward'|'backward', durationMs }
     const [flip, setFlip] = useState(null);
     const [zoomStyle, setZoomStyle] = useState(null);
+    const [isMobile, setIsMobile] = useState(function () {
+      return typeof window !== 'undefined' && !!window.matchMedia &&
+        window.matchMedia('(max-width: 720px)').matches;
+    });
     const binderWrapRef = useRef(null);
     usePreloadNeighbors(current);
+
+    // Track the mobile breakpoint (<=720px) reactively. Drives the floor-plan
+    // mobile-image swap and the "View Floor Plan" button vs the desktop hotspot.
+    useEffect(() => {
+      if (!window.matchMedia) return;
+      const mq = window.matchMedia('(max-width: 720px)');
+      const onChange = (e) => setIsMobile(e.matches);
+      if (mq.addEventListener) mq.addEventListener('change', onChange);
+      else mq.addListener(onChange);
+      return () => {
+        if (mq.removeEventListener) mq.removeEventListener('change', onChange);
+        else mq.removeListener(onChange);
+      };
+    }, []);
 
     const openCover = useCallback(() => {
       if (mode !== 'closed') return;
@@ -368,11 +396,13 @@
     //   - Backward flip: shows the CURRENT slide so it remains visible
     //     until the incoming page covers it.
     //   - At rest: shows the current slide.
+    // slideAt() resolves the mobile image swap (resolvePage) on top of getPage.
+    const slideAt = (n) => resolvePage(getPage(n), isMobile);
     let staticPage;
     if (flip && flip.dir === 'forward') {
-      staticPage = getPage(current + 1);
+      staticPage = slideAt(current + 1);
     } else {
-      staticPage = getPage(current);
+      staticPage = slideAt(current);
     }
 
     // Flipping faces:
@@ -381,11 +411,11 @@
     let flipFront = null, flipBack = null;
     if (flip) {
       if (flip.dir === 'forward') {
-        flipFront = getPage(current);
-        flipBack = getPage(current + 1);
+        flipFront = slideAt(current);
+        flipBack = slideAt(current + 1);
       } else {
-        flipFront = getPage(current - 1);
-        flipBack = getPage(current);
+        flipFront = slideAt(current - 1);
+        flipBack = slideAt(current);
       }
     }
 
@@ -469,11 +499,10 @@
               'aria-label': 'Next',
             }),
 
-            // Floor-plan hotspot — invisible click target over the printed
-            // "DOWNLOAD FLOOR PLAN" CTA in the top-right corner of slides that set
-            // `download`. Layered above the next-half (z-index) so the corner opens
-            // the residence PDF instead of paging. Only when fully open and at rest.
-            interactive && !flip && getPage(current) && getPage(current).download && h('button', {
+            // Floor-plan hotspot (desktop/tablet only) — invisible click target over
+            // the printed top-right CTA on slides that set `download`; opens the PDF.
+            // On mobile (<=720px) this is replaced by the .floorplan-btn below the slide.
+            !isMobile && interactive && !flip && getPage(current) && getPage(current).download && h('button', {
               key: 'download-cta',
               className: 'download-hotspot',
               onClick: (e) => { e.stopPropagation(); openFloorPlan(getPage(current)); },
@@ -498,7 +527,16 @@
             imageUrl: window.COVER_IMAGE_URL,
             onCTAClick: openCover,
           })
-        )
+        ),
+
+        // Mobile-only CTA, directly below the slide: opens the residence PDF.
+        // Replaces the desktop top-right hotspot on viewports <=720px.
+        isMobile && interactive && !flip && getPage(current) && getPage(current).download && h('button', {
+          key: 'floorplan-btn',
+          className: 'floorplan-btn',
+          onClick: () => { openFloorPlan(getPage(current)); },
+          'aria-label': 'View this residence floor plan PDF',
+        }, 'View Floor Plan')
       ),
 
       h('button', {

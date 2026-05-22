@@ -286,6 +286,29 @@
       border-radius: 8px;
     }
 
+    /* Mobile-only CTA shown directly below floor-plan slides (22–27). Rendered
+       only on <=720px via JS, so it never appears on desktop/tablet. */
+    .floorplan-btn {
+      appearance: none;
+      -webkit-appearance: none;
+      border: none;
+      background: #3F090D;
+      color: oklch(0.97 0.005 80);
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      font-size: 13px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      padding: 14px 30px;
+      border-radius: 999px;
+      cursor: pointer;
+      white-space: nowrap;
+      box-shadow: 0 6px 18px oklch(0.2 0.02 230 / 0.22);
+      -webkit-tap-highlight-color: transparent;
+      flex: 0 0 auto;
+    }
+    .floorplan-btn:active { opacity: 0.92; }
+
     /* ───────────────── Nav buttons ───────────────── */
     .nav-btn {
       width: clamp(40px, 5vw, 58px);
@@ -378,27 +401,11 @@
         max-height: calc(100vh - 80px);
       }
 
-      /* Floor-plan slides (22–27) are unreadable in the small 16:9 portrait band,
-         so on phones the whole slide becomes a tap target that opens the residence
-         PDF (zoomable in the native viewer). Swipe + the nav arrows still page. */
-      .download-hotspot { width: 100%; height: 100%; }
-      .download-hotspot::after {
-        content: "Tap to view floor plan";
-        position: absolute;
-        left: 50%;
-        bottom: 12%;
-        transform: translateX(-50%);
-        white-space: nowrap;
-        padding: 8px 16px;
-        border-radius: 999px;
-        background: oklch(0.22 0.02 230 / 0.78);
-        color: oklch(0.97 0.005 80);
-        font: 500 12px/1 'Inter', sans-serif;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        box-shadow: 0 4px 14px oklch(0 0 0 / 0.25);
-        pointer-events: none;
-      }
+      /* Floor-plan slides (22–27): a "View Floor Plan" button (rendered in
+         flipbook.js) sits directly below the slide on mobile, so stack the stage
+         vertically. Other slides have a single stage child, so column behaves the
+         same as the default row. */
+      .stage { flex-direction: column; gap: clamp(16px, 4vh, 32px); }
     }
   </style>
 </head>
@@ -407,7 +414,7 @@
 
   <script crossorigin src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
-  <script src="pages.js?v=11"></script>
-  <script src="flipbook.js?v=22"></script>
+  <script src="pages.js?v=12"></script>
+  <script src="flipbook.js?v=23"></script>
 </body>
 </html>

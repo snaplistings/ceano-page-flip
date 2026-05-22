@@ -40,16 +40,16 @@
     /* 19 */ img('ceano_digital_preview_18.png', 'Ceano slide 19'),
     /* 20 */ img('ceano_digital_preview_21.png', 'Ceano slide 20'),
     /* 21 */ img('ceano_24_residences.png', 'Ceano slide 21'),
-    // Slides 22–27 are residence floor plans with a printed "DOWNLOAD FLOOR PLAN"
-    // CTA in the top-right corner. `download: true` activates an invisible hotspot
-    // over it; `downloadUrl` is the residence PDF that the hotspot opens in a new
-    // tab (see openFloorPlan() in flipbook.js).
-    /* 22 */ img('new_201.png', 'Ceano slide 22', { download: true, downloadUrl: CDN + 'CEANO_Residence-201.pdf' }),
-    /* 23 */ img('new_202.png', 'Ceano slide 23', { download: true, downloadUrl: CDN + 'CEANO_Residence-202.pdf' }),
-    /* 24 */ img('new_302.png', 'Ceano slide 24', { download: true, downloadUrl: CDN + 'CEANO_Residence-302.pdf' }),
-    /* 25 */ img('new_303.png', 'Ceano slide 25', { download: true, downloadUrl: CDN + 'CEANO_Residence-303.pdf' }),
-    /* 26 */ img('new_406.png', 'Ceano slide 26', { download: true, downloadUrl: CDN + 'CEANO_Residence-406.pdf' }),
-    /* 27 */ img('new_Villa-4.png', 'Ceano slide 27', { download: true, downloadUrl: CDN + 'CEANO_Villa-4.pdf' }),
+    // Slides 22–27 are residence floor plans. `download: true` activates the CTA and
+    // `downloadUrl` is the residence PDF it opens in a new tab. `mobileImage` is a
+    // phone-specific still shown on viewports <=720px (see resolvePage() and the
+    // .floorplan-btn in flipbook.js); desktop/tablet use `image`.
+    /* 22 */ img('new_201.png', 'Ceano slide 22', { download: true, downloadUrl: CDN + 'CEANO_Residence-201.pdf', mobileImage: CDN + '210-mobile.png' }),
+    /* 23 */ img('new_202.png', 'Ceano slide 23', { download: true, downloadUrl: CDN + 'CEANO_Residence-202.pdf', mobileImage: CDN + '202-mobile.png' }),
+    /* 24 */ img('new_302.png', 'Ceano slide 24', { download: true, downloadUrl: CDN + 'CEANO_Residence-302.pdf', mobileImage: CDN + '302-mobile.png' }),
+    /* 25 */ img('new_303.png', 'Ceano slide 25', { download: true, downloadUrl: CDN + 'CEANO_Residence-303.pdf', mobileImage: CDN + '303-mobile.png' }),
+    /* 26 */ img('new_406.png', 'Ceano slide 26', { download: true, downloadUrl: CDN + 'CEANO_Residence-406.pdf', mobileImage: CDN + '406-mobile.png' }),
+    /* 27 */ img('new_Villa-4.png', 'Ceano slide 27', { download: true, downloadUrl: CDN + 'CEANO_Villa-4.pdf', mobileImage: CDN + 'villa4-mobile.png' }),
     /* 28 */ img('ceano_digital_preview_31.png', 'Ceano slide 28'),
     /* 29 */ vid('Waves-Background.mp4', 'Waves background', {
       loop: true,
