@@ -108,8 +108,12 @@
   }
 
   // ───────────────────────── Closed-cover landing ─────────────────────────
+  // The whole cover is a click target (onClick on the container), so clicking
+  // anywhere flips the book open — not just the printed CTA. The inner button
+  // stays for keyboard focus + an accessible name; its click harmlessly bubbles
+  // to the same handler (openCover is guarded, so a double call is a no-op).
   function ClosedCover({ imageUrl, onCTAClick }) {
-    return h('div', { className: 'closed-cover' },
+    return h('div', { className: 'closed-cover', onClick: onCTAClick },
       h('div', {
         className: 'closed-cover-image',
         role: 'img',
