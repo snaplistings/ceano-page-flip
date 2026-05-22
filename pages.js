@@ -40,15 +40,16 @@
     /* 19 */ img('ceano_digital_preview_18.png', 'Ceano slide 19'),
     /* 20 */ img('ceano_digital_preview_21.png', 'Ceano slide 20'),
     /* 21 */ img('ceano_digital_preview_23.png', 'Ceano slide 21'),
-    // Slides 22–27 carry a printed "DOWNLOAD FLOOR PLAN" CTA in the top-right
-    // corner. `download: true` activates an invisible click hotspot over it that
-    // downloads that slide's image (see downloadSlide() in flipbook.js).
-    /* 22 */ img('ceano_digital_preview_24.png', 'Ceano slide 22', { download: true }),
-    /* 23 */ img('ceano_digital_preview_25.png', 'Ceano slide 23', { download: true }),
-    /* 24 */ img('ceano_digital_preview_27.png', 'Ceano slide 24', { download: true }),
-    /* 25 */ img('303.png', 'Ceano slide 25', { download: true }),
-    /* 26 */ img('406.png', 'Ceano slide 26', { download: true }),
-    /* 27 */ img('Villa-4.png', 'Ceano slide 27', { download: true }),
+    // Slides 22–27 are residence floor plans with a printed "DOWNLOAD FLOOR PLAN"
+    // CTA in the top-right corner. `download: true` activates an invisible hotspot
+    // over it; `downloadUrl` is the residence PDF that the hotspot opens in a new
+    // tab (see openFloorPlan() in flipbook.js).
+    /* 22 */ img('new_201.png', 'Ceano slide 22', { download: true, downloadUrl: CDN + 'CEANO_Residence-201.pdf' }),
+    /* 23 */ img('new_202.png', 'Ceano slide 23', { download: true, downloadUrl: CDN + 'CEANO_Residence-202.pdf' }),
+    /* 24 */ img('new_302.png', 'Ceano slide 24', { download: true, downloadUrl: CDN + 'CEANO_Residence-302.pdf' }),
+    /* 25 */ img('new_303.png', 'Ceano slide 25', { download: true, downloadUrl: CDN + 'CEANO_Residence-303.pdf' }),
+    /* 26 */ img('new_406.png', 'Ceano slide 26', { download: true, downloadUrl: CDN + 'CEANO_Residence-406.pdf' }),
+    /* 27 */ img('new_Villa-4.png', 'Ceano slide 27', { download: true, downloadUrl: CDN + 'CEANO_Villa-4.pdf' }),
     /* 28 */ img('ceano_digital_preview_31.png', 'Ceano slide 28'),
     /* 29 */ vid('Waves-Background.mp4', 'Waves background', {
       loop: true,

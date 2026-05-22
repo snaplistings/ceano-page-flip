@@ -53,43 +53,23 @@
     return list[pageNum - 1] || null;
   }
 
-  // ─────────────────────────── Slide download ───────────────────────────
-  // Downloads a slide's image locally (used by the top-right "DOWNLOAD FLOOR
-  // PLAN" hotspot on slides that set `download: true`). We first try
-  // fetch→blob, which forces a real save and works same-origin OR cross-origin
-  // when the host sends CORS. If that's blocked (the CDN currently sends no
-  // Access-Control-Allow-Origin), we fall back to a plain download link — which
-  // saves directly when the asset carries `Content-Disposition: attachment`,
-  // and otherwise opens the image in a new tab. To make cross-origin downloads
-  // reliable, enable CORS or set Content-Disposition on the CDN objects.
-  function clickAnchor(href, filename, opts) {
+  // ─────────────────────────── Floor-plan CTA ───────────────────────────
+  // Slides that set `download: true` show an invisible top-right hotspot over the
+  // printed "DOWNLOAD FLOOR PLAN" pill. Clicking it opens that slide's residence
+  // PDF (`page.downloadUrl`) in a new browser tab. We fire a target=_blank anchor
+  // from the click gesture (rather than window.open) to avoid popup blockers.
+  function openExternal(url) {
+    if (!url) return;
     const a = document.createElement('a');
-    a.href = href;
-    if (filename) a.download = filename;
-    if (opts && opts.newTab) { a.target = '_blank'; a.rel = 'noopener'; }
+    a.href = url;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
   }
-  function downloadSlide(page) {
-    if (!page || !page.image) return;
-    const url = page.image;
-    let filename = page.downloadName;
-    if (!filename) {
-      try { filename = decodeURIComponent(url.split('/').pop().split('?')[0]); }
-      catch (e) { filename = 'ceano-slide.png'; }
-    }
-    fetch(url, { mode: 'cors' })
-      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.blob(); })
-      .then(function (blob) {
-        const obj = URL.createObjectURL(blob);
-        clickAnchor(obj, filename);
-        setTimeout(function () { URL.revokeObjectURL(obj); }, 10000);
-      })
-      .catch(function () {
-        // CORS-blocked / network error → direct link fallback.
-        clickAnchor(url, filename, { newTab: true });
-      });
+  function openFloorPlan(page) {
+    if (page) openExternal(page.downloadUrl || page.image);
   }
 
   // ─────────────────────────── Slide video ───────────────────────────
@@ -442,10 +422,17 @@
           ref: binderWrapRef,
           style: zoomStyle || undefined,
         },
-          // Binder artwork (hingeless tray). Acts as a brief container during
-          // the cover-flip; once the slide goes full-screen the page-area covers
-          // it. Not rendered while closed (the cover hides it anyway).
-          mode !== 'closed' && h('img', { src: 'binder_1x.webp', className: 'binder-img', alt: '', draggable: false, fetchpriority: 'high' }),
+          // Binder artwork (hingeless tray). Shown during the cover-flip and on
+          // slide 1; once slide 2 is active it fades to opacity 0 so the later
+          // slides read full-bleed. Not rendered while closed.
+          mode !== 'closed' && h('img', {
+            src: 'binder_1x.webp',
+            className: 'binder-img',
+            alt: '',
+            draggable: false,
+            fetchpriority: 'high',
+            style: { opacity: current >= 2 ? 0 : 1 },
+          }),
 
           // Page-area: the inner page-well where slides live.
           h('div', { className: 'page-area', style: pageAreaStyle },
@@ -478,16 +465,16 @@
               'aria-label': 'Next',
             }),
 
-            // Download hotspot — invisible click target over the printed
+            // Floor-plan hotspot — invisible click target over the printed
             // "DOWNLOAD FLOOR PLAN" CTA in the top-right corner of slides that set
-            // `download`. Layered above the next-half (z-index) so the corner
-            // downloads instead of paging. Only when fully open and at rest.
+            // `download`. Layered above the next-half (z-index) so the corner opens
+            // the residence PDF instead of paging. Only when fully open and at rest.
             interactive && !flip && getPage(current) && getPage(current).download && h('button', {
               key: 'download-cta',
               className: 'download-hotspot',
-              onClick: (e) => { e.stopPropagation(); downloadSlide(getPage(current)); },
-              title: 'Download floor plan',
-              'aria-label': 'Download this floor plan',
+              onClick: (e) => { e.stopPropagation(); openFloorPlan(getPage(current)); },
+              title: 'Open floor plan PDF',
+              'aria-label': 'Open this residence floor plan PDF',
             })
           ),
 
