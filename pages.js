@@ -187,7 +187,7 @@
   },
   {
     "kind": "image",
-    "image": "https://d1j3fd6wolejlf.cloudfront.net/ceano_digital_preview_3.png",
+    "image": "https://d1j3fd6wolejlf.cloudfront.net/with-titles.png",
     "alt": "Ceano slide 3"
   },
   {
