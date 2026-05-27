@@ -52,6 +52,11 @@
       display: flex;
       align-items: center;
       justify-content: center;
+    }
+    /* 3D context only while animating (cover-open / zoom / page-flip). iOS Safari
+       mis-composites a persistent perspective/preserve-3d layer (renders resting
+       slides rotated 90°), so a slide at rest must be a flat 2D layer. */
+    .stage.is-3d {
       perspective: 2400px;
       perspective-origin: 50% 50%;
     }
@@ -67,9 +72,14 @@
       filter:
         drop-shadow(0 30px 50px oklch(0.2 0.02 230 / 0.22))
         drop-shadow(0 10px 20px oklch(0.2 0.02 230 / 0.14));
-      transform-style: preserve-3d;
       user-select: none;
       -webkit-user-select: none;
+    }
+    /* preserve-3d only while animating (see .stage.is-3d). At rest the binder and
+       its page-well are flat 2D layers, so iOS Safari can't mis-rotate them. */
+    .binder-wrap.is-3d,
+    .binder-wrap.is-3d .page-area {
+      transform-style: preserve-3d;
     }
 
     /* Zoom-to-fit transition after the cover-flip. The actual transform is
@@ -96,7 +106,6 @@
     .page-area {
       position: absolute;
       z-index: 5;
-      transform-style: preserve-3d;
       overflow: hidden;
       box-shadow:
         inset 0 0 0 1px oklch(0.4 0.04 230 / 0.15),
@@ -414,6 +423,6 @@
   <script crossorigin src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
   <script src="pages.js?v=12"></script>
-  <script src="flipbook.js?v=25"></script>
+  <script src="flipbook.js?v=26"></script>
 </body>
 </html>

@@ -282,23 +282,33 @@
     // After the cover-flip lands, measure the binder-wrap rect and compute
     // a CONTAIN-FIT transform so the binder fills as much of the viewport
     // as possible while staying fully visible.
-    const handleCoverFlipDone = useCallback(() => {
+    // Contain-fit zoom: scale + translate the binder-wrap to fill the viewport.
+    // Measures the binder-wrap's NATURAL (untransformed) rect by clearing any
+    // existing transform first, so it's safe to recompute on resize/rotate.
+    const computeZoom = useCallback(() => {
       const wrap = binderWrapRef.current;
-      if (!wrap) { setMode('open'); return; }
+      if (!wrap) return null;
+      const prevTransform = wrap.style.transform;
+      wrap.style.transform = 'none';
       const rect = wrap.getBoundingClientRect();
+      wrap.style.transform = prevTransform;
       const vw = window.innerWidth;
       const vh = window.innerHeight;
       const scale = Math.min(vw / rect.width, vh / rect.height);
       const cx = rect.left + rect.width / 2;
       const cy = rect.top + rect.height / 2;
-      const dx = vw / 2 - cx;
-      const dy = vh / 2 - cy;
-      setZoomStyle({
-        transform: 'translate(' + dx + 'px,' + dy + 'px) scale(' + scale + ')',
+      return {
+        transform: 'translate(' + (vw / 2 - cx) + 'px,' + (vh / 2 - cy) + 'px) scale(' + scale + ')',
         transformOrigin: '50% 50%',
-      });
-      setMode('zooming');
+      };
     }, []);
+
+    const handleCoverFlipDone = useCallback(() => {
+      const z = computeZoom();
+      if (!z) { setMode('open'); return; }
+      setZoomStyle(z);
+      setMode('zooming');
+    }, [computeZoom]);
 
     useEffect(() => {
       if (mode !== 'zooming') return;
@@ -316,6 +326,30 @@
         clearTimeout(fallback);
       };
     }, [mode]);
+
+    // Keep the zoom transform fresh on resize / device rotation. Otherwise it's
+    // computed once at open and goes stale — the slide ends up mis-sized and, on
+    // iOS, the stale 3D state mis-composites. rAF-debounced; recompute again
+    // shortly after orientationchange since iOS briefly reports stale dimensions.
+    useEffect(() => {
+      if (mode !== 'open') return;
+      let raf = 0;
+      const recompute = () => {
+        cancelAnimationFrame(raf);
+        raf = requestAnimationFrame(() => {
+          const z = computeZoom();
+          if (z) setZoomStyle(z);
+        });
+      };
+      const onOrient = () => { recompute(); setTimeout(recompute, 300); };
+      window.addEventListener('resize', recompute);
+      window.addEventListener('orientationchange', onOrient);
+      return () => {
+        cancelAnimationFrame(raf);
+        window.removeEventListener('resize', recompute);
+        window.removeEventListener('orientationchange', onOrient);
+      };
+    }, [mode, computeZoom]);
 
     const interactive = mode === 'open';
     const canGoNext = interactive && current < TOTAL_PAGES && !flip;
@@ -419,10 +453,14 @@
       }
     }
 
+    // 3D context (perspective/preserve-3d) only while animating; a resting slide
+    // is a flat 2D layer (fixes iOS Safari rendering resting slides sideways).
+    const is3D = mode === 'opening' || mode === 'zooming' || !!flip;
     const binderWrapClass =
       'binder-wrap' +
       (mode === 'zooming' ? ' zooming' : '') +
-      (mode === 'open' ? ' open' : '');
+      (mode === 'open' ? ' open' : '') +
+      (is3D ? ' is-3d' : '');
 
     // Once the cover is open, the slide takes over the whole stage: the
     // page-area expands from its inset binder rect to fill the binder-wrap,
@@ -450,7 +488,7 @@
         'aria-label': 'Previous page',
       }, chevronLeft),
 
-      h('div', { className: 'stage', ref: stageRef },
+      h('div', { className: 'stage' + (is3D ? ' is-3d' : ''), ref: stageRef },
         h('div', {
           className: binderWrapClass,
           ref: binderWrapRef,
