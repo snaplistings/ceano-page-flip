@@ -29,27 +29,27 @@
   },
   {
     "kind": "image",
-    "image": "https://d1j3fd6wolejlf.cloudfront.net/ceano_digital_preview_8.png",
+    "image": "https://d1j3fd6wolejlf.cloudfront.net/Lv_CEANO_Slide_6_2.webp",
     "alt": "Ceano slide 8"
   },
   {
     "kind": "image",
-    "image": "https://d1j3fd6wolejlf.cloudfront.net/ceano_digital_preview_9.png",
+    "image": "https://d1j3fd6wolejlf.cloudfront.net/Lv_CEANO_Slide_7.webp",
     "alt": "Ceano slide 9"
   },
   {
     "kind": "image",
-    "image": "https://d1j3fd6wolejlf.cloudfront.net/Ceano-Facade.png",
+    "image": "https://d1j3fd6wolejlf.cloudfront.net/Lv_CEANO_Slide_8.webp",
     "alt": "Ceano facade"
   },
   {
     "kind": "image",
-    "image": "https://d1j3fd6wolejlf.cloudfront.net/ceano_digital_preview_10.png",
+    "image": "https://d1j3fd6wolejlf.cloudfront.net/Lv_CEANO_Slide_10.webp",
     "alt": "Ceano slide 11"
   },
   {
     "kind": "image",
-    "image": "https://d1j3fd6wolejlf.cloudfront.net/12.png",
+    "image": "https://d1j3fd6wolejlf.cloudfront.net/Lv_CEANO_Slide_11_1.webp",
     "alt": "Ceano slide 12"
   },
   {
@@ -59,32 +59,32 @@
   },
   {
     "kind": "image",
-    "image": "https://d1j3fd6wolejlf.cloudfront.net/ceano_digital_preview_13.png",
+    "image": "https://d1j3fd6wolejlf.cloudfront.net/Lv_CEANO_Slide_26.webp",
     "alt": "Ceano slide 14"
   },
   {
     "kind": "image",
-    "image": "https://d1j3fd6wolejlf.cloudfront.net/Lv_CEANO_Slide_27.webp",
+    "image": "https://d1j3fd6wolejlf.cloudfront.net/ceano_salespresentation_Rooftop-2.png",
     "alt": "Ceano slide 16"
   },
   {
     "kind": "image",
-    "image": "https://d1j3fd6wolejlf.cloudfront.net/ceano_digital_preview_16.png",
+    "image": "https://d1j3fd6wolejlf.cloudfront.net/Lv_CEANO_Slide_29.webp",
     "alt": "Ceano slide 17"
   },
   {
     "kind": "image",
-    "image": "https://d1j3fd6wolejlf.cloudfront.net/ceano_digital_preview_17.png",
+    "image": "https://d1j3fd6wolejlf.cloudfront.net/Lv_CEANO_Slide_31.webp",
     "alt": "Ceano slide 18"
   },
   {
     "kind": "image",
-    "image": "https://d1j3fd6wolejlf.cloudfront.net/ceano_digital_preview_18.png",
+    "image": "https://d1j3fd6wolejlf.cloudfront.net/Lv_CEANO_Slide_33.webp",
     "alt": "Ceano slide 19"
   },
   {
     "kind": "image",
-    "image": "https://d1j3fd6wolejlf.cloudfront.net/ceano_digital_preview_6.png",
+    "image": "https://d1j3fd6wolejlf.cloudfront.net/Lv_CEANO_Slide_57.webp",
     "alt": "Ceano slide 6"
   },
   {
@@ -94,12 +94,12 @@
   },
   {
     "kind": "image",
-    "image": "https://d1j3fd6wolejlf.cloudfront.net/ceano_digital_preview_21.png",
+    "image": "https://d1j3fd6wolejlf.cloudfront.net/Lv_CEANO_Slide_37.webp",
     "alt": "Ceano slide 20"
   },
   {
     "kind": "image",
-    "image": "https://d1j3fd6wolejlf.cloudfront.net/ceano_digital_preview19.png",
+    "image": "https://d1j3fd6wolejlf.cloudfront.net/Lv_CEANO_Slide_38.webp",
     "alt": ""
   },
   {
@@ -109,7 +109,7 @@
   },
   {
     "kind": "image",
-    "image": "https://d1j3fd6wolejlf.cloudfront.net/ceano_digital_preview21.png",
+    "image": "https://d1j3fd6wolejlf.cloudfront.net/Lv_CEANO_Slide_40.webp",
     "alt": ""
   },
   {
@@ -119,12 +119,12 @@
   },
   {
     "kind": "image",
-    "image": "https://d1j3fd6wolejlf.cloudfront.net/ceano_digital_preview23.png",
+    "image": "https://d1j3fd6wolejlf.cloudfront.net/Lv_CEANO_Slide_45.webp",
     "alt": ""
   },
   {
     "kind": "image",
-    "image": "https://d1j3fd6wolejlf.cloudfront.net/ceano_digital_preview24.png",
+    "image": "https://d1j3fd6wolejlf.cloudfront.net/Lv_CEANO_Slide_46.webp",
     "alt": ""
   },
   {
@@ -182,7 +182,7 @@
   },
   {
     "kind": "image",
-    "image": "https://d1j3fd6wolejlf.cloudfront.net/ceano_digital_preview_31.png",
+    "image": "https://d1j3fd6wolejlf.cloudfront.net/Lv_CEANO_Slide_59.webp",
     "alt": "Ceano slide 28"
   },
   {
