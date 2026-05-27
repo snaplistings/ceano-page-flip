@@ -64,7 +64,7 @@
   },
   {
     "kind": "image",
-    "image": "https://d1j3fd6wolejlf.cloudfront.net/ceano_salespresentation_Rooftop-2.png",
+    "image": "https://d1j3fd6wolejlf.cloudfront.net/Lv_CEANO_Slide_27.webp",
     "alt": "Ceano slide 16"
   },
   {
