@@ -286,9 +286,15 @@
       border-radius: 8px;
     }
 
-    /* Mobile-only CTA shown directly below floor-plan slides (22–27). Rendered
-       only on <=720px via JS, so it never appears on desktop/tablet. */
+    /* Floor-plan CTA (slides 22–27) on mobile + tablet — fixed, centered, 24px above the
+       counter. Rendered only on <=1366px via JS, so it never appears on desktop. The
+       bottom = counter offset clamp(...) + ~36px counter height + 24px gap. */
     .floorplan-btn {
+      position: fixed;
+      left: 50%;
+      bottom: calc(clamp(14px, 2.2vw, 28px) + 60px);
+      transform: translateX(-50%);
+      z-index: 50;
       appearance: none;
       -webkit-appearance: none;
       border: none;
@@ -305,7 +311,6 @@
       white-space: nowrap;
       box-shadow: 0 6px 18px oklch(0.2 0.02 230 / 0.22);
       -webkit-tap-highlight-color: transparent;
-      flex: 0 0 auto;
     }
     .floorplan-btn:active { opacity: 0.92; }
 
@@ -400,12 +405,6 @@
         width: min(96%, calc((100vh - 80px) * var(--binder-aspect)));
         max-height: calc(100vh - 80px);
       }
-
-      /* Floor-plan slides (22–27): a "View Floor Plan" button (rendered in
-         flipbook.js) sits directly below the slide on mobile, so stack the stage
-         vertically. Other slides have a single stage child, so column behaves the
-         same as the default row. */
-      .stage { flex-direction: column; gap: clamp(16px, 4vh, 32px); }
     }
   </style>
 </head>
@@ -415,6 +414,6 @@
   <script crossorigin src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
   <script src="pages.js?v=12"></script>
-  <script src="flipbook.js?v=23"></script>
+  <script src="flipbook.js?v=25"></script>
 </body>
 </html>
