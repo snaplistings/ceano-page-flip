@@ -29,27 +29,27 @@
   },
   {
     "kind": "image",
-    "image": "https://d1j3fd6wolejlf.cloudfront.net/Lv_CEANO_Slide_6_2.webp",
+    "image": "https://d1j3fd6wolejlf.cloudfront.net/5_art-of-intl-living.webp",
     "alt": "Ceano slide 8"
   },
   {
     "kind": "image",
-    "image": "https://d1j3fd6wolejlf.cloudfront.net/Lv_CEANO_Slide_7.webp",
+    "image": "https://d1j3fd6wolejlf.cloudfront.net/ceano_digital_preview_9.png",
     "alt": "Ceano slide 9"
   },
   {
     "kind": "image",
-    "image": "https://d1j3fd6wolejlf.cloudfront.net/Lv_CEANO_Slide_8.webp",
+    "image": "https://d1j3fd6wolejlf.cloudfront.net/Ceano-Facade.png",
     "alt": "Ceano facade"
   },
   {
     "kind": "image",
-    "image": "https://d1j3fd6wolejlf.cloudfront.net/Lv_CEANO_Slide_10.webp",
+    "image": "https://d1j3fd6wolejlf.cloudfront.net/ceano_digital_preview_10.png",
     "alt": "Ceano slide 11"
   },
   {
     "kind": "image",
-    "image": "https://d1j3fd6wolejlf.cloudfront.net/Lv_CEANO_Slide_11_1.webp",
+    "image": "https://d1j3fd6wolejlf.cloudfront.net/12.png",
     "alt": "Ceano slide 12"
   },
   {
@@ -59,7 +59,7 @@
   },
   {
     "kind": "image",
-    "image": "https://d1j3fd6wolejlf.cloudfront.net/Lv_CEANO_Slide_26.webp",
+    "image": "https://d1j3fd6wolejlf.cloudfront.net/ceano_digital_preview_13.png",
     "alt": "Ceano slide 14"
   },
   {
@@ -69,22 +69,22 @@
   },
   {
     "kind": "image",
-    "image": "https://d1j3fd6wolejlf.cloudfront.net/Lv_CEANO_Slide_29.webp",
+    "image": "https://d1j3fd6wolejlf.cloudfront.net/ceano_digital_preview_16.png",
     "alt": "Ceano slide 17"
   },
   {
     "kind": "image",
-    "image": "https://d1j3fd6wolejlf.cloudfront.net/Lv_CEANO_Slide_31.webp",
+    "image": "https://d1j3fd6wolejlf.cloudfront.net/ceano_digital_preview_17.png",
     "alt": "Ceano slide 18"
   },
   {
     "kind": "image",
-    "image": "https://d1j3fd6wolejlf.cloudfront.net/Lv_CEANO_Slide_33.webp",
+    "image": "https://d1j3fd6wolejlf.cloudfront.net/ceano_digital_preview_18.png",
     "alt": "Ceano slide 19"
   },
   {
     "kind": "image",
-    "image": "https://d1j3fd6wolejlf.cloudfront.net/Lv_CEANO_Slide_57.webp",
+    "image": "https://d1j3fd6wolejlf.cloudfront.net/ceano_digital_preview_6.png",
     "alt": "Ceano slide 6"
   },
   {
@@ -94,12 +94,12 @@
   },
   {
     "kind": "image",
-    "image": "https://d1j3fd6wolejlf.cloudfront.net/Lv_CEANO_Slide_37.webp",
+    "image": "https://d1j3fd6wolejlf.cloudfront.net/ceano_digital_preview_21.png",
     "alt": "Ceano slide 20"
   },
   {
     "kind": "image",
-    "image": "https://d1j3fd6wolejlf.cloudfront.net/Lv_CEANO_Slide_38.webp",
+    "image": "https://d1j3fd6wolejlf.cloudfront.net/ceano_digital_preview19.png",
     "alt": ""
   },
   {
@@ -109,7 +109,7 @@
   },
   {
     "kind": "image",
-    "image": "https://d1j3fd6wolejlf.cloudfront.net/Lv_CEANO_Slide_40.webp",
+    "image": "https://d1j3fd6wolejlf.cloudfront.net/ceano_digital_preview21.png",
     "alt": ""
   },
   {
@@ -119,12 +119,12 @@
   },
   {
     "kind": "image",
-    "image": "https://d1j3fd6wolejlf.cloudfront.net/Lv_CEANO_Slide_45.webp",
+    "image": "https://d1j3fd6wolejlf.cloudfront.net/ceano_digital_preview23.png",
     "alt": ""
   },
   {
     "kind": "image",
-    "image": "https://d1j3fd6wolejlf.cloudfront.net/Lv_CEANO_Slide_46.webp",
+    "image": "https://d1j3fd6wolejlf.cloudfront.net/ceano_digital_preview24.png",
     "alt": ""
   },
   {
@@ -182,7 +182,7 @@
   },
   {
     "kind": "image",
-    "image": "https://d1j3fd6wolejlf.cloudfront.net/Lv_CEANO_Slide_59.webp",
+    "image": "https://d1j3fd6wolejlf.cloudfront.net/ceano_digital_preview_31.png",
     "alt": "Ceano slide 28"
   },
   {
