@@ -29,7 +29,7 @@
   },
   {
     "kind": "image",
-    "image": "https://d1j3fd6wolejlf.cloudfront.net/5_art-of-intl-living.webp",
+    "image": "https://d1j3fd6wolejlf.cloudfront.net/ceano_digital_preview_8.png",
     "alt": "Ceano slide 8"
   },
   {
@@ -39,7 +39,7 @@
   },
   {
     "kind": "image",
-    "image": "https://d1j3fd6wolejlf.cloudfront.net/Ceano-Facade.png",
+    "image": "https://d1j3fd6wolejlf.cloudfront.net/ceano_preview_7.webp",
     "alt": "Ceano facade"
   },
   {
@@ -64,7 +64,7 @@
   },
   {
     "kind": "image",
-    "image": "https://d1j3fd6wolejlf.cloudfront.net/ceano_salespresentation_Rooftop-2.png",
+    "image": "https://d1j3fd6wolejlf.cloudfront.net/ceano_preview_12.webp",
     "alt": "Ceano slide 16"
   },
   {
@@ -99,32 +99,32 @@
   },
   {
     "kind": "image",
-    "image": "https://d1j3fd6wolejlf.cloudfront.net/ceano_digital_preview19.png",
+    "image": "https://d1j3fd6wolejlf.cloudfront.net/ceano_preview_19_1x.webp",
     "alt": ""
   },
   {
     "kind": "image",
-    "image": "https://d1j3fd6wolejlf.cloudfront.net/ceano_digital_preview20.png",
+    "image": "https://d1j3fd6wolejlf.cloudfront.net/ceano_preview_20_1x.webp",
     "alt": ""
   },
   {
     "kind": "image",
-    "image": "https://d1j3fd6wolejlf.cloudfront.net/ceano_digital_preview21.png",
+    "image": "https://d1j3fd6wolejlf.cloudfront.net/ceano_preview_21_1x.webp",
     "alt": ""
   },
   {
     "kind": "image",
-    "image": "https://d1j3fd6wolejlf.cloudfront.net/ceano_digital_preview22.png",
+    "image": "https://d1j3fd6wolejlf.cloudfront.net/ceano_preview_22_1x.webp",
     "alt": ""
   },
   {
     "kind": "image",
-    "image": "https://d1j3fd6wolejlf.cloudfront.net/ceano_digital_preview23.png",
+    "image": "https://d1j3fd6wolejlf.cloudfront.net/ceano_preview_23_1x.webp",
     "alt": ""
   },
   {
     "kind": "image",
-    "image": "https://d1j3fd6wolejlf.cloudfront.net/ceano_digital_preview24.png",
+    "image": "https://d1j3fd6wolejlf.cloudfront.net/ceano_preview_24_1x.webp",
     "alt": ""
   },
   {
